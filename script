@@ -1,0 +1,253 @@
+const products = [
+  {
+    id: 1,
+    name: "Lavender Dreams",
+    description: "Calming lavender scent perfect for relaxation",
+    price: 24.99,
+    icon: "🕯️"
+  },
+  {
+    id: 2,
+    name: "Vanilla Bliss",
+    description: "Sweet vanilla fragrance for cozy evenings",
+    price: 22.99,
+    icon: "🕯️"
+  },
+  {
+    id: 3,
+    name: "Ocean Breeze",
+    description: "Fresh ocean-inspired aroma",
+    price: 26.99,
+    icon: "🕯️"
+  },
+  {
+    id: 4,
+    name: "Cinnamon Spice",
+    description: "Warm and inviting cinnamon blend",
+    price: 23.99,
+    icon: "🕯️"
+  },
+  {
+    id: 5,
+    name: "Rose Garden",
+    description: "Delicate rose petals fragrance",
+    price: 27.99,
+    icon: "🕯️"
+  },
+  {
+    id: 6,
+    name: "Forest Pine",
+    description: "Fresh pine scent bringing nature indoors",
+    price: 25.99,
+    icon: "🕯️"
+  }
+];
+
+let cart = [];
+
+function displayProducts() {
+  const productsGrid = document.getElementById('products-grid');
+  
+  products.forEach(product => {
+    const productCard = document.createElement('div');
+    productCard.className = 'product-card';
+    productCard.innerHTML = `
+      <div class="product-image">${product.icon}</div>
+      <div class="product-info">
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-description">${product.description}</p>
+        <div class="product-price">$${product.price.toFixed(2)}</div>
+        <button class="add-to-cart-btn" onclick="addToCart(${product.id})">Add to Cart</button>
+      </div>
+    `;
+    productsGrid.appendChild(productCard);
+  });
+}
+
+function addToCart(productId) {
+  const product = products.find(p => p.id === productId);
+  const existingItem = cart.find(item => item.id === productId);
+  
+  if (existingItem) {
+    existingItem.quantity++;
+  } else {
+    cart.push({ ...product, quantity: 1 });
+  }
+  
+  updateCartCount();
+  showNotification('Added to cart!');
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(item => item.id !== productId);
+  updateCartCount();
+  updateCartDisplay();
+}
+
+function updateCartCount() {
+  const cartCount = document.getElementById('cart-count');
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  cartCount.textContent = totalItems;
+}
+
+function updateCartDisplay() {
+  const cartItems = document.getElementById('cart-items');
+  const cartTotal = document.getElementById('cart-total');
+  
+  if (cart.length === 0) {
+    cartItems.innerHTML = '<p style="text-align: center; padding: 2rem;">Your cart is empty</p>';
+    cartTotal.textContent = '0.00';
+    return;
+  }
+  
+  cartItems.innerHTML = '';
+  let total = 0;
+  
+  cart.forEach(item => {
+    const cartItem = document.createElement('div');
+    cartItem.className = 'cart-item';
+    cartItem.innerHTML = `
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">$${item.price.toFixed(2)} x ${item.quantity}</div>
+      </div>
+      <button class="cart-item-remove" onclick="removeFromCart(${item.id})">Remove</button>
+    `;
+    cartItems.appendChild(cartItem);
+    total += item.price * item.quantity;
+  });
+  
+  cartTotal.textContent = total.toFixed(2);
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background-color: #B88A7A;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 3000;
+    animation: slideIn 0.3s ease-out;
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => notification.remove(), 300);
+  }, 2000);
+}
+
+function initializeEventListeners() {
+  const modal = document.getElementById('cart-modal');
+  const cartBtn = document.querySelector('.cart-btn');
+  const closeBtn = document.querySelector('.close');
+  const checkoutBtn = document.getElementById('checkout-button');
+
+  if (!modal || !cartBtn || !closeBtn || !checkoutBtn) {
+    console.error('Required elements not found');
+    return;
+  }
+
+  cartBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    updateCartDisplay();
+    modal.style.display = 'block';
+  });
+
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+
+  checkoutBtn.addEventListener('click', async () => {
+    if (cart.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+    
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = 'Processing...';
+    
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items: cart }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        if (data.needsStripeKey) {
+          alert(`Ready to checkout! Total: $${data.total}\n\n${data.message}\n\nOnce configured, customers will be redirected to Stripe's secure checkout page.`);
+          cart = [];
+          updateCartCount();
+          modal.style.display = 'none';
+        } else if (data.url) {
+          window.location.href = data.url;
+        }
+      } else {
+        alert('Error creating checkout session: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('An error occurred during checkout. Please try again.');
+    } finally {
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Proceed to Checkout';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  displayProducts();
+  initializeEventListeners();
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('success') === 'true') {
+    showNotification('Payment successful! Thank you for your order.');
+    cart = [];
+    updateCartCount();
+  } else if (urlParams.get('canceled') === 'true') {
+    showNotification('Payment canceled. Your cart is still available.');
+  }
+});
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
