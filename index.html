@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KM Intrinsic Care - Handcrafted Candles</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">KM Intrinsic Care</div>
+            <ul class="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#shop">Shop</a></li>
+                <li><a href="#cart" class="cart-btn">Cart (<span id="cart-count">0</span>)</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Intrinsic Cares</h1>
+            <p class="tagline">Est. 2022</p>
+            <p class="hero-description">Handcrafted candles made with love and natural ingredients</p>
+            <a href="#shop" class="cta-button">Shop Now</a>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2>About Our Business</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Welcome to KM Intrinsic Care, where passion meets craftsmanship. Established in 2022, we've been creating handcrafted candles that bring warmth and comfort to homes across the country.</p>
+                    <p>Our candles are made with premium natural soy wax, lead-free cotton wicks, and carefully selected fragrance oils. Each candle is hand-poured with attention to detail, ensuring the highest quality product for our customers.</p>
+                    <p>We believe in the power of scent to create ambiance, evoke memories, and provide a moment of peace in your busy day. Every candle we create is infused with care and designed to enhance your space.</p>
+                    <div class="about-features">
+                        <div class="feature">
+                            <h3>Natural Ingredients</h3>
+                            <p>100% natural soy wax and premium fragrance oils</p>
+                        </div>
+                        <div class="feature">
+                            <h3>Hand-Poured</h3>
+                            <p>Each candle is carefully crafted by hand</p>
+                        </div>
+                        <div class="feature">
+                            <h3>Eco-Friendly</h3>
+                            <p>Sustainable materials and recyclable packaging</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="shop" class="shop">
+        <div class="container">
+            <h2>Our Collection</h2>
+            <div class="products-grid" id="products-grid">
+            </div>
+        </div>
+    </section>
+
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Shopping Cart</h2>
+            <div id="cart-items"></div>
+            <div class="cart-total">
+                <strong>Total: $<span id="cart-total">0.00</span></strong>
+            </div>
+            <button id="checkout-button" class="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 KM Intrinsic Care. All rights reserved.</p>
+            <p>Est. 2022 | Handcrafted with love</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
